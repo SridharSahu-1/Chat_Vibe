@@ -10,6 +10,24 @@ import {
 import { useChatStore } from "../store/useChatStore";
 import { useEffect } from "react";
 
+interface VideoCallProps {
+  isOpen: boolean;
+  onClose: () => void;
+  callStatus: string;
+  incomingCall: any;
+  callType: string;
+  localVideoRef: React.RefObject<HTMLVideoElement>;
+  remoteVideoRef: React.RefObject<HTMLVideoElement>;
+  isVideoEnabled: boolean;
+  isAudioEnabled: boolean;
+  answerCall: () => void;
+  rejectCall: () => void;
+  toggleVideo: () => void;
+  toggleAudio: () => void;
+  localStream: MediaStream | null;
+  remoteStream: MediaStream | null;
+}
+
 const VideoCall = ({
   isOpen,
   onClose,
@@ -26,21 +44,18 @@ const VideoCall = ({
   toggleAudio,
   localStream,
   remoteStream,
-}: any) => {
-  // We still need selectedUser for displaying the user's info
+}: VideoCallProps) => {
   const { selectedUser } = useChatStore();
 
   console.log({ localVideoRef });
   console.log({ remoteVideoRef });
 
-  // ✨ ADD: Effect to attach the local stream when it's available
   useEffect(() => {
     if (localVideoRef.current && localStream) {
       localVideoRef.current.srcObject = localStream;
     }
   }, [localStream, callStatus]);
 
-  // ✨ ADD: Effect to attach the remote stream when it's available
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
       remoteVideoRef.current.srcObject = remoteStream;
@@ -50,7 +65,6 @@ const VideoCall = ({
   if (!isOpen) return null;
 
   const renderCallInterface = () => {
-    // Renders the 'Calling...' UI
     if (callStatus === "calling") {
       return (
         <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white">
@@ -71,7 +85,7 @@ const VideoCall = ({
           </div>
 
           <button
-            onClick={onClose} // Triggers endCall via the parent
+            onClick={onClose}
             className="w-16 h-16 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-colors"
           >
             <PhoneOff className="w-6 h-6 text-white" />
@@ -80,7 +94,6 @@ const VideoCall = ({
       );
     }
 
-    // Renders the incoming call UI with Accept/Reject buttons
     if (callStatus === "receiving" && incomingCall) {
       return (
         <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white">
@@ -104,13 +117,13 @@ const VideoCall = ({
 
           <div className="flex gap-4">
             <button
-              onClick={rejectCall} // Uses the rejectCall function prop
+              onClick={rejectCall}
               className="w-16 h-16 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-colors"
             >
               <PhoneOff className="w-6 h-6 text-white" />
             </button>
             <button
-              onClick={answerCall} // Uses the answerCall function prop
+              onClick={answerCall}
               className="w-16 h-16 bg-green-600 hover:bg-green-700 rounded-full flex items-center justify-center transition-colors"
             >
               <Phone className="w-6 h-6 text-white" />
@@ -120,7 +133,6 @@ const VideoCall = ({
       );
     }
 
-    // Renders the main video/audio call interface
     if (callStatus === "in-call") {
       return (
         <div className="relative h-full bg-gray-900">
